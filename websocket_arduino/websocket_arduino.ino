@@ -1,32 +1,33 @@
 #include <WiFi.h>
-#include <WebSocketsClient.h>
+#include <WebSocketsServer.h>
 
 #define INTERNAL_LED 2
 
 const char* ssid = "EatAssDownloadFast";
 const char* password = "AmericasA$$";
 const char *webSocketUrl = "ws://192.168.1.185";
+uint8_t count = 0;
 
+WebSocketsServer webSocket = WebSocketsServer(80);
 
-WebSocketsClient webSocket;
-
-void webSocketEvent(WStype_t type, uint8_t *payload, size_t length)
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
 {
 
   switch (type)
   {
   case WStype_DISCONNECTED:
-    Serial.printf("[WSc] Disconnected!\n");
+    Serial.printf("[%u] Disconnected!\n", num);
     break;
   case WStype_CONNECTED:
-    Serial.printf("[WSc] Connected to url: %s\n", payload);
+    Serial.printf("[%u] Connection from ", num);
+    Serial.println(webSocket.remoteIP(num));
+    webSocket.sendTXT(num, "Hello from esp1");
     break;
   case WStype_TEXT:
-    Serial.printf("[WSc] get text: %s\n", payload);
+    Serial.printf("[%u] Text: %s\n", num, payload);
+    webSocket.sendTXT(num, payload);
     break;
   case WStype_BIN:
-    Serial.printf("[WSc] get binary length: %u\n", length);
-    break;
   case WStype_ERROR:
   case WStype_FRAGMENT_TEXT_START:
   case WStype_FRAGMENT_BIN_START:
@@ -58,23 +59,16 @@ void setup() {
   delay(2000);
   digitalWrite(INTERNAL_LED, LOW);
 
-  // server address, port and URL
-  webSocket.begin("192.168.1.185", 3000, "/sendSensorData");
-
-  // event handler
+  webSocket.begin();
   webSocket.onEvent(webSocketEvent);
-
-  // try ever 5000 again if connection has failed
-  webSocket.setReconnectInterval(5000);
 
 }
 
 void loop() {    
-    // send message to server when Connected
-    webSocket.sendTXT("test string esp32");
+  webSocket.loop();
 
-    // sleep for some time before next read
-    delay(100);
-
-    webSocket.loop();
+  String counter = "esp1: " + String(count);
+  webSocket.broadcastTXT(counter);
+  count++;
+  delay(1000);
 }
