@@ -21,11 +21,18 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
   case WStype_CONNECTED:
     Serial.printf("[%u] Connection from ", num);
     Serial.println(webSocket.remoteIP(num));
-    webSocket.sendTXT(num, "Hello from esp1");
     break;
   case WStype_TEXT:
     Serial.printf("[%u] Text: %s\n", num, payload);
-    webSocket.sendTXT(num, payload);
+
+    if ( strncmp((char*)payload, "zap", 3) == 0)
+    {
+      Serial.println("TURNING ON LIGHT");
+      digitalWrite(INTERNAL_LED, HIGH);
+      delay(5000);
+      digitalWrite(INTERNAL_LED, LOW);
+    }
+
     break;
   case WStype_BIN:
   case WStype_ERROR:
@@ -67,7 +74,7 @@ void setup() {
 void loop() {    
   webSocket.loop();
 
-  String counter = "esp1: " + String(count);
+  String counter = String(count);
   webSocket.broadcastTXT(counter);
   count++;
   delay(1000);

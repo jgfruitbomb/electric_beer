@@ -1,7 +1,7 @@
 import websocket
 
 ws = websocket.WebSocket()
-espServer = "ws://192.168.1.155/"
+espServer = "ws://192.168.1.183/"
 ws.connect(espServer)
 
 print("Connected to Websocket server")
