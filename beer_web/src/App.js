@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Chart from "./components/Chart";
 import useWebSocket, { ReadyState } from "react-use-websocket";
+import styles from "./App.css";
 
 // Micro-controller drink names
 // Lord of drink
@@ -19,14 +20,14 @@ import useWebSocket, { ReadyState } from "react-use-websocket";
 
 function App() {
   // esp nicknames
-  const esp1Name = "3 Guys 1 tazer";
-  const esp2Name = "White Girl Wasted";
-  const esp3Name = "Jag Off";
+  const esp1Name = "esp1";
+  const esp2Name = "esp2";
+  const esp3Name = "esp3";
 
   // Websocket urls
   const ws1Url = "ws://192.168.1.183";
   const ws2Url = "ws://192.168.1.155";
-  const ws3Url = "ws://192.168.1.153";
+  const ws3Url = "ws://192.168.1.132";
 
   // Data object arrays
   const [esp1, setEsp1] = useState([{}]);
@@ -95,7 +96,7 @@ function App() {
         { [esp3Name]: lastMessage3.data },
       ]);
 
-      if (esp1.length > 24) {
+      if (esp3.length > 24) {
         setEsp3((prev) => prev.slice(1));
       }
     }
@@ -121,9 +122,11 @@ function App() {
     <>
       <button onClick={handleSendMessage1}>Message esp1</button>
       <button onClick={handleSendMessage2}>Message esp2</button>
-      <Chart numbers={esp1} nickname={esp1Name} readyState={readyState1} />
-      <Chart numbers={esp2} nickname={esp2Name} readyState={readyState2} />
-      <Chart numbers={esp3} nickname={esp3Name} readyState={readyState3} />
+      <div className="flex-container">
+        <Chart numbers={esp1} nickname={esp1Name} readyState={readyState1} />
+        <Chart numbers={esp2} nickname={esp2Name} readyState={readyState2} />
+        <Chart numbers={esp3} nickname={esp3Name} readyState={readyState3} />
+      </div>
     </>
   );
 }

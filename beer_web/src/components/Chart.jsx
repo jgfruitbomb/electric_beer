@@ -1,11 +1,5 @@
-import {
-  AreaChart,
-  Area,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend,
-} from "recharts";
+import { AreaChart, Area, YAxis, CartesianGrid, Tooltip } from "recharts";
+import styles from "./Chart.css";
 
 function Chart(props) {
   let connectionStatus;
@@ -26,11 +20,12 @@ function Chart(props) {
   }
 
   return (
-    <>
-      <h1>The WebSocket is currently {connectionStatus}</h1>
+    <div className="flex-object">
+      <h1>{props.nickname}</h1>
+      <p>{connectionStatus}</p>
       <AreaChart
-        width={500}
-        height={300}
+        width={600}
+        height={700}
         data={props.numbers}
         margin={{
           top: 0,
@@ -42,7 +37,6 @@ function Chart(props) {
         <CartesianGrid strokeDasharray="3 3" />
         <YAxis type="number" domain={[0, 255]} />
         <Tooltip />
-        <Legend />
         <Area
           connectNulls
           type="monotone"
@@ -52,7 +46,7 @@ function Chart(props) {
           strokeWidth="5"
         />
       </AreaChart>
-    </>
+    </div>
   );
 }
 
