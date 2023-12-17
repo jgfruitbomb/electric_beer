@@ -6,7 +6,7 @@
 const char* ssid = "EatAssDownloadFast";
 const char* password = "AmericasA$$";
 const char *webSocketUrl = "ws://192.168.1.185";
-uint8_t count = 0;
+uint8_t count = 255;
 
 WebSocketsServer webSocket = WebSocketsServer(80);
 
@@ -76,6 +76,6 @@ void loop() {
 
   String counter = String(count);
   webSocket.broadcastTXT(counter);
-  count++;
+  count--;
   delay(1000);
 }

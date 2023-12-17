@@ -1,5 +1,3 @@
-import { useCallback, useEffect, useState } from "react";
-import useWebSocket, { ReadyState } from "react-use-websocket";
 import {
   AreaChart,
   Area,
@@ -10,47 +8,30 @@ import {
 } from "recharts";
 
 function Chart(props) {
-  const [numbers, setNumbers] = useState([{}]);
+  let connectionStatus;
 
-  const { sendMessage, lastMessage, readyState } = useWebSocket(props.url, {
-    onOpen: () => console.log("open"),
-    shouldReconnect: (closeEvent) => true,
-  });
-
-  const connectionStatus = {
-    [ReadyState.CONNECTING]: "Connecting",
-    [ReadyState.OPEN]: "Open",
-    [ReadyState.CLOSING]: "Closing",
-    [ReadyState.CLOSED]: "Closed",
-    [ReadyState.UNINSTANTIATED]: "Uninstantiated",
-  }[readyState];
-
-  useEffect(() => {
-    if (lastMessage !== null) {
-      console.log(lastMessage.data);
-      console.log(props.name);
-      setNumbers((prevNumbers) => [
-        ...prevNumbers,
-        { [props.name]: lastMessage.data },
-      ]);
-      console.log(numbers);
-
-      if (numbers.length > 24) {
-        setNumbers((prevNumbers) => prevNumbers.slice(1));
-      }
-    }
-  }, [lastMessage, numbers.length]);
-
-  const handleClickChangeSocketUrl = useCallback(() => sendMessage("zap"), []);
+  switch (props.readyState) {
+    case 0:
+      connectionStatus = "CONNECTING";
+      break;
+    case 1:
+      connectionStatus = "OPEN";
+      break;
+    case 2:
+      connectionStatus = "CLOSING";
+      break;
+    case 3:
+      connectionStatus = "CLOSED";
+      break;
+  }
 
   return (
     <>
       <h1>The WebSocket is currently {connectionStatus}</h1>
-      <button onClick={handleClickChangeSocketUrl}>Send message</button>
       <AreaChart
         width={500}
         height={300}
-        data={numbers}
+        data={props.numbers}
         margin={{
           top: 0,
           right: 0,
@@ -65,7 +46,7 @@ function Chart(props) {
         <Area
           connectNulls
           type="monotone"
-          dataKey={props.name}
+          dataKey={props.nickname}
           stroke="#8884d8"
           activeDot={{ r: 24 }}
           strokeWidth="5"
