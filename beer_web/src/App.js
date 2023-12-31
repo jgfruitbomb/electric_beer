@@ -34,6 +34,9 @@ function App() {
   const [esp2, setEsp2] = useState([{}]);
   const [esp3, setEsp3] = useState([{}]);
 
+  // Completed or not
+  const [counter, setCounter] = useState(0);
+
   // Open websocket connection
   const {
     sendMessage: sendMessage1,
@@ -90,6 +93,7 @@ function App() {
   }, [lastMessage2]);
 
   useEffect(() => {
+    if (counter > 24) return;
     if (lastMessage3 !== null) {
       setEsp3((prevNumbers) => [
         ...prevNumbers,
@@ -99,6 +103,13 @@ function App() {
       if (esp3.length > 24) {
         setEsp3((prev) => prev.slice(1));
       }
+
+      esp3.forEach((value) => {
+        if (Object.values(value) > 20) {
+          setCounter((prev) => prev + 1);
+          console.log(`Counter increased: ${counter}`);
+        }
+      });
     }
   }, [lastMessage3]);
 
@@ -114,7 +125,7 @@ function App() {
   };
 
   const handleSendMessage3 = () => {
-    sendMessage1("zap");
+    sendMessage3("zap");
     console.log("sending zap command to 3");
   };
 
@@ -122,10 +133,15 @@ function App() {
     <>
       <button onClick={handleSendMessage1}>Message esp1</button>
       <button onClick={handleSendMessage2}>Message esp2</button>
+      <button onClick={handleSendMessage3}>Message esp3</button>
       <div className="flex-container">
         <Chart numbers={esp1} nickname={esp1Name} readyState={readyState1} />
         <Chart numbers={esp2} nickname={esp2Name} readyState={readyState2} />
-        <Chart numbers={esp3} nickname={esp3Name} readyState={readyState3} />
+        {counter < 24 ? (
+          <Chart numbers={esp3} nickname={esp3Name} readyState={readyState3} />
+        ) : (
+          "Completed"
+        )}
       </div>
     </>
   );

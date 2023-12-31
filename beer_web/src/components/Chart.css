@@ -1,7 +1,6 @@
 .flex-object {
   display: flex;
   flex-direction: column;
-  background-color: yellowgreen;
 }
 
 h1 {
