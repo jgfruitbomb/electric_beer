@@ -34,10 +34,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t *payload, size_t length)
     if ( strncmp((char*)payload, "zap", 3) == 0)
     {
       digitalWrite(18, HIGH);
+      digitalWrite(19, HIGH);
   
       delay(1000);  // 1000 milliseconds or 1 second
   
       digitalWrite(18, LOW);
+      digitalWrite(19, LOW);
     }
 
     break;
@@ -80,6 +82,8 @@ void setup() {
   // Control relay
   pinMode(18, OUTPUT);
   digitalWrite(18, LOW);
+  pinMode(19, OUTPUT);
+  digitalWrite(19, LOW);
 }
 
 void loop() {    
@@ -106,18 +110,17 @@ void loop() {
            Serial.print("distance=");
            Serial.print(distance/10);
            Serial.println("cm");
-                 //Serial.print("distance=");
-      //distance=distance / 10;
-      //Serial.println(distance);
 
-      //String myString;
-      //myString = String(distance);
-      //webSocket.broadcastTXT(myString);
+      String myString;
+      myString = String(distance/10);
+      webSocket.broadcastTXT(myString);
           }else 
              {
                Serial.println("Below the lower limit");
+               //webSocket.broadcastTXT("0");
              }
       }else Serial.println("ERROR");
+      //webSocket.broadcastTXT("0");
      }
      delay(100);
 }

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Chart from "./components/Chart";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import styles from "./App.css";
@@ -20,13 +20,13 @@ import styles from "./App.css";
 
 function App() {
   // esp nicknames
-  const esp1Name = "esp1";
+  const esp1Name = "2 Guys 1 tazer";
   const esp2Name = "esp2";
-  const esp3Name = "esp3";
+  const esp3Name = "White Girl Wasted";
 
   // Websocket urls
   const ws1Url = "ws://192.168.1.183";
-  const ws2Url = "ws://192.168.1.155";
+  const ws2Url = "ws://192.168.1.12";
   const ws3Url = "ws://192.168.1.132";
 
   // Data object arrays
@@ -35,7 +35,8 @@ function App() {
   const [esp3, setEsp3] = useState([{}]);
 
   // Completed or not
-  const [counter, setCounter] = useState(0);
+  const [winner, setWinner] = useState("");
+  const hasWinnerRef = useRef(false);
 
   // Open websocket connection
   const {
@@ -76,6 +77,17 @@ function App() {
       if (esp1.length > 24) {
         setEsp1((prev) => prev.slice(1));
       }
+
+      let counter1 = 0;
+      esp1.forEach((value) => {
+        if (Object.values(value) > 17) {
+          counter1++;
+          console.log(`Counter for ${esp1Name} increased: ${counter1}`);
+        }
+        if (counter1 > 23) {
+          setWinner(`${esp1Name}`);
+        }
+      });
     }
   }, [lastMessage1]);
 
@@ -93,7 +105,7 @@ function App() {
   }, [lastMessage2]);
 
   useEffect(() => {
-    if (counter > 24) return;
+    if (winner !== "") return;
     if (lastMessage3 !== null) {
       setEsp3((prevNumbers) => [
         ...prevNumbers,
@@ -104,14 +116,33 @@ function App() {
         setEsp3((prev) => prev.slice(1));
       }
 
+      let counter3 = 0;
       esp3.forEach((value) => {
-        if (Object.values(value) > 20) {
-          setCounter((prev) => prev + 1);
-          console.log(`Counter increased: ${counter}`);
+        if (Object.values(value) > 19) {
+          counter3++;
+          console.log(`Counter for ${esp3Name} increased: ${counter3}`);
+        }
+        if (counter3 > 23) {
+          setWinner(`${esp3Name}`);
         }
       });
     }
   }, [lastMessage3]);
+
+  useEffect(() => {
+    // Check if winner is set and execute the corresponding function
+    if (winner !== "" && !hasWinnerRef.current) {
+      // You can add additional conditions if needed
+      if (winner === esp1Name) {
+        handleSendMessage3();
+      } else if (winner === esp3Name) {
+        handleSendMessage1();
+      }
+
+      // Update the flag to true to prevent further calls
+      hasWinnerRef.current = true;
+    }
+  }, [winner, esp1Name, esp3Name]);
 
   // Sending Messages to sockets
   const handleSendMessage1 = () => {
@@ -131,18 +162,14 @@ function App() {
 
   return (
     <>
-      <button onClick={handleSendMessage1}>Message esp1</button>
-      <button onClick={handleSendMessage2}>Message esp2</button>
-      <button onClick={handleSendMessage3}>Message esp3</button>
-      <div className="flex-container">
-        <Chart numbers={esp1} nickname={esp1Name} readyState={readyState1} />
-        <Chart numbers={esp2} nickname={esp2Name} readyState={readyState2} />
-        {counter < 24 ? (
+      {winner === "" ? (
+        <div className="flex-container">
+          <Chart numbers={esp1} nickname={esp1Name} readyState={readyState1} />
           <Chart numbers={esp3} nickname={esp3Name} readyState={readyState3} />
-        ) : (
-          "Completed"
-        )}
-      </div>
+        </div>
+      ) : (
+        <h1>Winner is {winner}</h1>
+      )}
     </>
   );
 }
