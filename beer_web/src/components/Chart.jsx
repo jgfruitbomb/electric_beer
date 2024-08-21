@@ -35,7 +35,7 @@ function Chart(props) {
         }}
       >
         <CartesianGrid strokeDasharray="3 3" />
-        <YAxis type="number" domain={[2, 19.7]} />
+        <YAxis allowDataOverflow={true} domain={[0, 100]} />
         <Tooltip />
         <Area
           connectNulls

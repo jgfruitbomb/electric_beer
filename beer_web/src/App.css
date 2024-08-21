@@ -2,3 +2,28 @@
   display: flex;
   justify-content: space-around;
 }
+
+.start-button {
+  background-color: #28a745; /* Green background */
+  color: white; /* White text */
+  border: none; /* Remove borders */
+  padding: 15px 30px; /* Add some padding */
+  font-size: 18px; /* Increase font size */
+  font-weight: bold; /* Bold text */
+  text-transform: uppercase; /* Uppercase text */
+  letter-spacing: 1.5px; /* Space out letters */
+  border-radius: 50px; /* Rounded corners */
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2); /* Add shadow */
+  cursor: pointer; /* Pointer/hand icon */
+  transition: all 0.3s ease 0s; /* Smooth transitions */
+}
+
+.start-button:hover {
+  background-color: #218838; /* Darker green on hover */
+  box-shadow: 0 15px 20px rgba(0, 0, 0, 0.3); /* Bigger shadow on hover */
+  transform: translateY(-3px); /* Lift button on hover */
+}
+
+.start-button:active {
+  transform: translateY(1px); /* Press effect */
+}

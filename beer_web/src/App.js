@@ -2,6 +2,7 @@ import { useEffect, useState, useRef } from "react";
 import Chart from "./components/Chart";
 import useWebSocket, { ReadyState } from "react-use-websocket";
 import styles from "./App.css";
+import audio from "./music/chinese_beer.mp3";
 
 // Micro-controller drink names
 // Lord of drink
@@ -32,8 +33,10 @@ function App() {
   const [esp2, setEsp2] = useState([{}]);
 
   // Empty Cup Value
-  const esp1Empty = 20;
+  const esp1Empty = 19.8;
   const esp2Empty = 17.5;
+  const esp1Full = 6;
+  const esp2Full = 6;
 
   // Completed or not
   const [winner, setWinner] = useState("");
@@ -60,55 +63,63 @@ function App() {
     shouldReconnect: (closeEvent) => true,
   });
 
-  // Reading data from sockets if over 24 data points remove first one
-  useEffect(() => {
+  const chartData = (espFull, espEmpty, espName) => {
     if (winner !== "" || start === false) return;
-    if (lastMessage1 !== null) {
-      setEsp1((prevNumbers) => [
-        ...prevNumbers,
-        { [esp1Name]: lastMessage1.data },
-      ]);
+    let lastMessage;
+    if (espName === esp1Name) {
+      lastMessage = lastMessage1;
+    } else {
+      lastMessage = lastMessage2;
+    }
 
-      if (esp1.length > 24) {
-        setEsp1((prev) => prev.slice(1));
+    if (lastMessage !== null) {
+      let percentage =
+        100 - ((espFull - lastMessage.data) / (espFull - espEmpty)) * 100;
+      if (percentage < 0) percentage = 0;
+      console.log(
+        `${espName} percentage: ${percentage} value: ${lastMessage.data}`
+      );
+
+      let counter = 0;
+      if (espName === esp1Name) {
+        setEsp1((prevNumbers) => [...prevNumbers, { [espName]: percentage }]);
+
+        if (esp1.length > 24) {
+          setEsp1((prev) => prev.slice(1));
+        }
+        esp1.forEach((value) => {
+          if (Object.values(value) <= 5) {
+            //Allowing for 5% margin of error
+            counter++;
+          }
+        });
+      } else {
+        setEsp2((prevNumbers) => [...prevNumbers, { [espName]: percentage }]);
+
+        if (esp2.length > 24) {
+          setEsp2((prev) => prev.slice(1));
+        }
+        esp2.forEach((value) => {
+          if (Object.values(value) <= 5) {
+            //Allowing for 5 margin of error
+            counter++;
+          }
+        });
       }
 
-      let counter1 = 0;
-      esp1.forEach((value) => {
-        if (Object.values(value) > esp1Empty) {
-          counter1++;
-          console.log(`Counter for ${esp1Name} increased: ${counter1}`);
-        }
-        if (counter1 > 23) {
-          setWinner(`${esp1Name}`);
-        }
-      });
+      console.log(`Counter for ${espName} value: ${counter}`);
+      if (counter > 23) {
+        setWinner(`${espName}`);
+      }
     }
+  };
+  // Reading data from sockets if over 24 data points remove first one
+  useEffect(() => {
+    chartData(esp1Full, esp1Empty, esp1Name);
   }, [lastMessage1]);
 
   useEffect(() => {
-    if (winner !== "" || start == false) return;
-    if (lastMessage2 !== null) {
-      setEsp2((prevNumbers) => [
-        ...prevNumbers,
-        { [esp2Name]: lastMessage2.data },
-      ]);
-
-      if (esp2.length > 24) {
-        setEsp2((prev) => prev.slice(1));
-      }
-
-      let counter2 = 0;
-      esp2.forEach((value) => {
-        if (Object.values(value) > esp2Empty) {
-          counter2++;
-          console.log(`Counter for ${esp2Name} increased: ${counter2}`);
-        }
-        if (counter2 > 23) {
-          setWinner(`${esp2Name}`);
-        }
-      });
-    }
+    chartData(esp2Full, esp2Empty, esp2Name);
   }, [lastMessage2]);
 
   useEffect(() => {
@@ -137,6 +148,11 @@ function App() {
     console.log("sending zap command to 2");
   };
 
+  const onHandleStart = () => {
+    setStart(true);
+    new Audio(audio).play();
+  };
+
   return (
     <>
       {winner === "" ? (
@@ -153,7 +169,9 @@ function App() {
               readyState={readyState2}
             />
           </div>
-          <button onClick={() => setStart(true)}>Start</button>
+          <button className="start-button" onClick={onHandleStart}>
+            Start
+          </button>
         </>
       ) : (
         <>
